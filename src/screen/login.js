@@ -1,10 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View, ScrollView } from 'react-native';
 
-import Header from './components/HeaderLogin';
-import LoginForm from './components/LoginForm';
-import RememberRow from './components/RememberRow';
-import ContactSection from './components/ContactSection';
+import Header from '../components/HeaderLogin';
+import LoginForm from '../components/LoginForm';
+import RememberRow from '../components/RememberRow';
+import ContactSection from '../components/ContactSection';
 
 export default function App() {
   return (
