@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image } from 'react-native';
-import styles from '../styles/Header.styles';
+import styles from '../styles/HeaderLogin.styles';
 
 export default function Header() {
   return (
