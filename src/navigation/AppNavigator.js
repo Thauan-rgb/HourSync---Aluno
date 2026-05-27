@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginScreen from '../screens/login';
-import EnvioHoras2Screen from '../screens/envioHoras2';
+import LoginScreen from '../screen/login';
+import EnvioHoras2Screen from '../screen/envioHoras2';
 
 const Stack = createNativeStackNavigator();
 
