@@ -2,13 +2,13 @@ import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
 
-  // Container principal da tela (QUADRO BRANCO)
+  // Container principal da tela
   container: {
     flex: 1,
     backgroundColor: '#F0F4F8',
   },
 
-  // Deixar o meio branco com a borda de cima redonda
+  // Área branca com borda de cima redonda
   contentWrapper: {
     flex: 1,
     backgroundColor: '#F0F4F8',
