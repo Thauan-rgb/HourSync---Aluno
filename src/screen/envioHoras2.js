@@ -1,11 +1,11 @@
-import { View, StyleSheet, ScrollView } from 'react-native';
-import Header from '../components/Header';        
+import { View, ScrollView } from 'react-native';
+import Header from '../components/Header';
 import SubmitButton from '../components/SubmitButton';
 import ReviewBanner from '../components/ReviewBanner';
 import ActivityCard from '../components/ActivityCard';
-import styles from '../envioHorasStyles'; // estilo do fundo do card/tela
+import styles from '../styles/envioHorasStyles';
 
-export default function App() {
+export default function EnvioHoras2Screen({ navigation }) {
   return (
     <View style={styles.container}>
       <Header />
@@ -21,4 +21,3 @@ export default function App() {
     </View>
   );
 }
-
