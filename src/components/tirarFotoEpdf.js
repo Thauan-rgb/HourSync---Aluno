@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import nuvem from '../assets/nuvem.png';
-import camera from '../assets/Camera.png';
+import nuvem from '../../assets/icon.png';
+import camera from '../../assets/icon.png';
 
 export default function TirarFotoEpdf() {
 

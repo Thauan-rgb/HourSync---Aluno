@@ -6,7 +6,7 @@ export default function Header() {
   return (
     <View style={styles.quadrado}>
       <Image
-        source={require('../assets/logo.png')}
+        source={require('../../assets/logo.png')}
         style={styles.logo}
         resizeMode="contain"
       />

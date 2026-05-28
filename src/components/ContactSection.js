@@ -14,21 +14,21 @@ export default function ContactSection() {
       <View style={styles.iconsRow}>
         <TouchableOpacity>
           <Image
-            source={require('../assets/email.png')}
+            source={require('../../assets/email.png')}
             style={styles.icon}
             resizeMode="contain"
           />
         </TouchableOpacity>
         <TouchableOpacity>
           <Image
-            source={require('../assets/whatsapp.png')}
+            source={require('../../assets/whatsapp.png')}
             style={styles.icon}
             resizeMode="contain"
           />
         </TouchableOpacity>
         <TouchableOpacity>
           <Image
-            source={require('../assets/github.png')}
+            source={require('../../assets/github.png')}
             style={styles.icon}
             resizeMode="contain"
           />
