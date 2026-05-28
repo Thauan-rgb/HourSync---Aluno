@@ -7,11 +7,11 @@ import styles from '../envioHorasStyles'; // estilo do fundo do card/tela
 
 export default function App() {
   return (
-    <View style={styles.container}>
+    <View styles={styles.container}>
       <Header />
 
-      <View style={styles.contentWrapper}>
-        <ScrollView style={styles.content}>
+      <View styles={styles.contentWrapper}>
+        <ScrollView styles={styles.content}>
           <ReviewBanner />
           <ActivityCard />
         </ScrollView>
