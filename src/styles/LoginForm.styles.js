@@ -29,7 +29,12 @@ export default StyleSheet.create({
     borderRadius: 25,
     width: '100%',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 3,
+    shadowColor: '#54C1DD',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
 
   buttonText: {
