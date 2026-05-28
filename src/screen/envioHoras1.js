@@ -1,16 +1,16 @@
-import { View, StyleSheet, ScrollView } from 'react-native';
-import Header from './components/headerEnvioHoras1';        // ← header 
-import Formulario from './components/formularioEnvioHoras1'; // ← formularios
-import Botao from './components/botao';
-import styles from './envioHorasStyles'; // estilo do fundo do card/tela
+import { View, ScrollView } from 'react-native';
+import Header from '../components/headerEnvioHoras1';
+import Formulario from '../components/formularioEnvioHoras1';
+import Botao from '../components/botao';
+import styles from '../styles/envioHorasStyles';
 
-export default function App() {
+export default function EnvioHoras1Screen({ navigation }) {
   return (
     <View style={styles.container}>
       <Header />
       <ScrollView>
         <Formulario />
-        <Botao titulo="Próximo" />
+        <Botao titulo="Próximo" onPress={() => navigation.navigate('EnvioHoras2')} />
       </ScrollView>
     </View>
   );
