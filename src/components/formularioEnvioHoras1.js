@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { useState } from 'react';
 import Dropdown from './dropdown';
-import { TextInputMask } from 'react-native-masked-text';
 import TirarFotoEpdf from './tirarFotoEpdf';
+
 export default function Formulario() {
 
   const [curso, setCurso] = useState('');
@@ -11,6 +11,16 @@ export default function Formulario() {
   const [horasCategoria, setHorasCategoria] = useState('');
   const [horasRestantes, setHorasRestantes] = useState('');
   const [data, setData] = useState('');
+
+  function handleDataChange(text) {
+    // Remove tudo que não for número
+    const numeros = text.replace(/\D/g, '');
+    // Formata como DD/MM/AAAA
+    let formatado = numeros;
+    if (numeros.length > 2) formatado = numeros.slice(0, 2) + '/' + numeros.slice(2);
+    if (numeros.length > 4) formatado = numeros.slice(0, 2) + '/' + numeros.slice(2, 4) + '/' + numeros.slice(4, 8);
+    setData(formatado);
+  }
 
   return (
     <View style={styles.formulario}>
@@ -63,20 +73,19 @@ export default function Formulario() {
       </View>
 
       {/* DATA */}
-       <Text style={styles.label}>Data de Submissão</Text>
-      <TextInputMask
-        type={'datetime'}
-        options={{ format: 'DD/MM/YYYY' }}
-        value={data}
-        onChangeText={setData}
+      <Text style={styles.label}>Data de Submissão</Text>
+      <TextInput
         style={styles.input}
         placeholder="dd/mm/aaaa"
         placeholderTextColor="#999"
+        value={data}
+        onChangeText={handleDataChange}
         keyboardType="numeric"
+        maxLength={10}
       />
-      {/* aqui puxa os componentes de tirar foto ou subir pdf */}
-      <TirarFotoEpdf /> 
-      
+
+      <TirarFotoEpdf />
+
     </View>
   );
 }
