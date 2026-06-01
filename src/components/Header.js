@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, DrawerActions } from '@react-navigation/native';
 
 export default function Header() {
   const navigation = useNavigation();
@@ -10,16 +10,23 @@ export default function Header() {
 
       {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.menuButton}>
+
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        >
           <Ionicons name="menu" size={20} color="#fff" />
         </TouchableOpacity>
+
         <Text style={styles.headerTitle}>Envio de Horas</Text>
+
         <TouchableOpacity
           style={styles.menuButton}
           onPress={() => navigation.navigate('Notificacoes')}
         >
           <Ionicons name="notifications-outline" size={20} color="#fff" />
         </TouchableOpacity>
+
       </View>
 
       {/* STEPPER */}
