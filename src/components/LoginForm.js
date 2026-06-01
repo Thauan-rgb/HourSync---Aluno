@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { login } from '../api';
+import { login } from '../api/auth';
 import styles from '../styles/LoginForm.styles';
 
 export default function LoginForm() {
