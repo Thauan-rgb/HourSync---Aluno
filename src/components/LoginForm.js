@@ -13,7 +13,7 @@ export default function LoginForm() {
     const data = await login(email, senha);
 
     if (data.token) {
-      navigation.navigate('EnvioHoras1');
+      navigation.navigate('Main');
     } else {
       Alert.alert('Erro', data.erro || 'Credenciais inválidas.');
     }
