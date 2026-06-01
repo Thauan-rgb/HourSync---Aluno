@@ -1,44 +1,43 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Header() {
+  const navigation = useNavigation();
+
   return (
     <View>
 
       {/* HEADER */}
       <View style={styles.header}>
-
-        {/* Botão do menu (ícone de hambúrguer) */}
         <TouchableOpacity style={styles.menuButton}>
           <Ionicons name="menu" size={20} color="#fff" />
-        </TouchableOpacity> 
-      
-      {/*Titulo do header */}
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Envio de Horas</Text>
-
-      {/* Botão de notificações*/}
-        <TouchableOpacity style={styles.menuButton}>
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={() => navigation.navigate('Notificacoes')}
+        >
           <Ionicons name="notifications-outline" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
-        {/* STEPPER (Bara de progresso)*/}
+      {/* STEPPER */}
       <View style={styles.stepper}>
         <View style={styles.stepCircle}>
-          <Text style={styles. stepText}>1</Text>
+          <Text style={styles.stepText}>1</Text>
         </View>
         <View style={styles.stepLine} />
         <View style={styles.stepCircle}>
-          <Text style={styles. stepText}>2</Text>
+          <Text style={styles.stepText}>2</Text>
         </View>
-        </View>
+      </View>
 
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-    // HEADER -- Cabeçalho azul com título e botões
   header: {
     backgroundColor: '#56C3DC',
     padding: 30,
@@ -47,15 +46,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingBottom: 16,
   },
-
-   // Título centralizado no header
   headerTitle: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
   },
-
-  // Botão circular do header (menu e notificações)
   menuButton: {
     width: 36,
     height: 36,
@@ -64,9 +59,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-
-   // STEPPER -- Barra de progresso com etapas
   stepper: {
     backgroundColor: '#56C3DC',
     flexDirection: 'row',
@@ -77,8 +69,6 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: -1,
   },
-
-// Círculo de cada etapa
   stepCircle: {
     width: 30,
     height: 30,
@@ -87,14 +77,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  // Número dentro do círculo
   stepText: {
     color: '#208AEF',
     fontWeight: 'bold',
   },
-
- // Linha do meio das bolas
   stepLine: {
     flex: 1,
     maxWidth: 80,
