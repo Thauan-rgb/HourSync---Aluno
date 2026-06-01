@@ -1,162 +1,155 @@
-import React from 'react';
-import { View, ScrollView, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, ScrollView, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 
 import Header from '../components/headerCertificados';
 import ListaCertificados from '../components/cardCertificados';
 import styles from '../styles/certificadosStyles';
+import { useAuth } from '../contexto/AuthContext';
+import { listarCertificados } from '../api/certificados';
+
+const FILTROS = ['Todos', 'Pendentes', 'Rejeitados', 'Aprovados'];
+const STATUS_MAP = { Pendentes: 'PENDENTE', Rejeitados: 'REJEITADO', Aprovados: 'APROVADO' };
 
 export default function CertificadosScreen() {
+  const { token, usuario } = useAuth();
+  const [todos, setTodos] = useState([]);
+  const [busca, setBusca] = useState('');
+  const [filtroAtivo, setFiltroAtivo] = useState('Todos');
+  const [carregando, setCarregando] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      carregar();
+    }, [token, usuario])
+  );
+
+  async function carregar() {
+    try {
+      setCarregando(true);
+      const data = await listarCertificados(token);
+      const meus = Array.isArray(data)
+        ? data.filter((c) => {
+            const id = c.alunoId?._id || c.alunoId;
+            return id === usuario?.id || id === usuario?._id;
+          })
+        : [];
+      setTodos(meus);
+    } catch {
+      /* silencioso */
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  const filtrados = todos.filter((c) => {
+    const statusOk = filtroAtivo === 'Todos' || c.status === STATUS_MAP[filtroAtivo];
+    const buscaOk = !busca || c.titulo?.toLowerCase().includes(busca.toLowerCase());
+    return statusOk && buscaOk;
+  });
+
+  const contagem = {
+    Todos: todos.length,
+    Pendentes: todos.filter((c) => c.status === 'PENDENTE').length,
+    Rejeitados: todos.filter((c) => c.status === 'REJEITADO').length,
+    Aprovados: todos.filter((c) => c.status === 'APROVADO').length,
+  };
+
+  const CHIP_CORES = {
+    Todos: '#4A90E2',
+    Pendentes: '#FABB05',
+    Rejeitados: '#EA4335',
+    Aprovados: '#34A853',
+  };
+  const CHIP_ICONS = {
+    Pendentes: 'time',
+    Rejeitados: 'close-circle',
+    Aprovados: 'checkmark-circle',
+  };
+
   return (
     <View style={styles.container}>
-      
       <Header />
 
-      {/* Área branca sobreposta */}
       <View style={styles.body}>
-        
-        {/* BARRA DE BUSCA E FILTRO */}
         <View style={localStyles.searchRow}>
           <View style={localStyles.searchInputBox}>
             <Ionicons name="search" size={18} color="#999" />
-            <TextInput 
-              style={localStyles.searchInput} 
-              placeholder="Buscar certificado" 
+            <TextInput
+              style={localStyles.searchInput}
+              placeholder="Buscar certificado"
               placeholderTextColor="#999"
+              value={busca}
+              onChangeText={setBusca}
             />
           </View>
-          <TouchableOpacity style={localStyles.filterButton}>
-            <Ionicons name="options-outline" size={18} color="#4A90E2" />
-            <Text style={localStyles.filterText}>Filtrar</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* CHIPS DE STATUS (Rolagem Horizontal) */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={localStyles.chipScroll} contentContainerStyle={localStyles.chipContainer}>
-          <TouchableOpacity style={[localStyles.chip, { borderColor: '#4A90E2' }]}>
-            <Text style={[localStyles.chipText, { color: '#4A90E2' }]}>Todos 12</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[localStyles.chip, { borderColor: '#FABB05' }]}>
-            <Ionicons name="time" size={14} color="#FABB05" />
-            <Text style={[localStyles.chipText, { color: '#FABB05' }]}>Pendentes 3</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[localStyles.chip, { borderColor: '#EA4335' }]}>
-            <Ionicons name="close-circle" size={14} color="#EA4335" />
-            <Text style={[localStyles.chipText, { color: '#EA4335' }]}>Rejeitados 2</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[localStyles.chip, { borderColor: '#34A853' }]}>
-            <Ionicons name="checkmark-circle" size={14} color="#34A853" />
-            <Text style={[localStyles.chipText, { color: '#34A853' }]}>Aprovados 7</Text>
-          </TouchableOpacity>
+          {FILTROS.map((f) => {
+            const cor = CHIP_CORES[f];
+            const ativo = filtroAtivo === f;
+            return (
+              <TouchableOpacity
+                key={f}
+                style={[localStyles.chip, { borderColor: cor, backgroundColor: ativo ? cor + '22' : '#fff' }]}
+                onPress={() => setFiltroAtivo(f)}
+              >
+                {CHIP_ICONS[f] && <Ionicons name={CHIP_ICONS[f]} size={14} color={cor} />}
+                <Text style={[localStyles.chipText, { color: cor }]}>{f} {contagem[f]}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
 
-        {/* LISTA DE CARDS */}
-        <ScrollView showsVerticalScrollIndicator={false}>
-          
-          <ListaCertificados 
-            tipo="aprovado"
-            titulo="Participação em seminários"
-            categoria="Categoria . Extensão"
-            dataEnvio="Enviado em 25/04/2026 às 14:33"
-            horas="4h validadas"
-            dataAprovacao="Aprovado em 29/04/2026"
-          />
-
-          <ListaCertificados 
-            tipo="pendente"
-            titulo="Participação em workshop"
-            categoria="Categoria . Extensão"
-            dataEnvio="Enviado em 25/04/2026 às 14:33"
-            horas="10h solicitadas"
-            dataAprovacao="Aguardando análise"
-          />
-
-          <ListaCertificados 
-            tipo="rejeitado"
-            titulo="Representação estudantil"
-            categoria="Categoria . Extensão"
-            dataEnvio="Enviado em 25/04/2026 às 14:33"
-            horas="10h solicitadas"
-            dataAprovacao="Rejeitado em 29/04/2026"
-          />
-
-          <ListaCertificados 
-            tipo="aprovado"
-            titulo="Visitas técnicas"
-            categoria="Categoria . Extensão"
-            dataEnvio="Enviado em 25/04/2026 às 14:33"
-            horas="4h validadas"
-            dataAprovacao="Aprovado em 29/04/2026"
-          />
-          
-          {/* Espaço extra no final da lista */}
-          <View style={{ height: 40 }} />
-        </ScrollView>
-
+        {carregando ? (
+          <ActivityIndicator color="#56C3DC" style={{ marginTop: 40 }} />
+        ) : (
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {filtrados.length === 0 && (
+              <Text style={{ textAlign: 'center', color: '#999', marginTop: 40 }}>
+                Nenhum certificado encontrado.
+              </Text>
+            )}
+            {filtrados.map((c) => (
+              <ListaCertificados
+                key={c._id}
+                tipo={c.status === 'APROVADO' ? 'aprovado' : c.status === 'REJEITADO' ? 'rejeitado' : 'pendente'}
+                titulo={c.titulo}
+                categoria={c.categoriaId?.nome || '—'}
+                dataEnvio={`Enviado em ${new Date(c.criadoEm).toLocaleDateString('pt-BR')}`}
+                horas={c.status === 'APROVADO' ? `${c.horasAprovadas || c.horas}h validadas` : `${c.horas}h solicitadas`}
+                dataAprovacao={
+                  c.status === 'APROVADO'
+                    ? `Aprovado`
+                    : c.status === 'REJEITADO'
+                    ? `Rejeitado`
+                    : 'Aguardando análise'
+                }
+              />
+            ))}
+            <View style={{ height: 40 }} />
+          </ScrollView>
+        )}
       </View>
     </View>
   );
 }
 
-// Estilos locais apenas para a busca e filtros desta tela
 const localStyles = StyleSheet.create({
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-    gap: 12,
-  },
+  searchRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
   searchInputBox: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    height: 44,
+    flex: 1, flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#fff', borderWidth: 1, borderColor: '#E0E0E0',
+    borderRadius: 8, paddingHorizontal: 12, height: 44,
   },
-  searchInput: {
-    flex: 1,
-    marginLeft: 8,
-    fontSize: 14,
-    color: '#333',
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    height: 44,
-    justifyContent: 'center',
-  },
-  filterText: {
-    color: '#4A90E2',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  chipScroll: {
-    flexGrow: 0,
-    marginBottom: 20,
-  },
-  chipContainer: {
-    gap: 8,
-    paddingRight: 20,
-  },
+  searchInput: { flex: 1, marginLeft: 8, fontSize: 14, color: '#333' },
+  chipScroll: { flexGrow: 0, marginBottom: 20 },
+  chipContainer: { gap: 8, paddingRight: 20 },
   chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: '#fff',
-    gap: 4,
+    flexDirection: 'row', alignItems: 'center', borderWidth: 1.5,
+    borderRadius: 20, paddingVertical: 6, paddingHorizontal: 12, gap: 4,
   },
-  chipText: {
-    fontWeight: 'bold',
-    fontSize: 13,
-  },
+  chipText: { fontWeight: 'bold', fontSize: 13 },
 });
