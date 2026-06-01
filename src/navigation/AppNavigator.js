@@ -4,6 +4,7 @@ import LoginScreen from '../screen/login';
 import EnvioHoras1Screen from '../screen/envioHoras1';
 import EnvioHoras2Screen from '../screen/envioHoras2';
 import EsqueceuSenhaScreen from '../screen/EsqueceuSenha';
+import NotificacoesScreen from '../screen/notificacoes'; 
 
 const Stack = createNativeStackNavigator();
 
@@ -15,6 +16,7 @@ export default function AppNavigator() {
         <Stack.Screen name="EsqueceuSenha" component={EsqueceuSenhaScreen} />
         <Stack.Screen name="EnvioHoras1" component={EnvioHoras1Screen} />
         <Stack.Screen name="EnvioHoras2" component={EnvioHoras2Screen} />
+        <Stack.Screen name="Notificacoes" component={NotificacoesScreen} /> 
       </Stack.Navigator>
     </NavigationContainer>
   );
