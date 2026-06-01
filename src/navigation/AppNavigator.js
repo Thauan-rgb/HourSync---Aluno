@@ -1,17 +1,19 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+ 
 import LoginScreen from '../screen/login';
+import EsqueceuSenhaScreen from '../screen/EsqueceuSenha';
+import Dashboard from '../screen/Dashboard';
 import EnvioHoras1Screen from '../screen/envioHoras1';
 import EnvioHoras2Screen from '../screen/envioHoras2';
-import EsqueceuSenhaScreen from '../screen/EsqueceuSenha';
 import NotificacoesScreen from '../screen/notificacoes';
-import CustomDrawer from '../components/CustomDrawer';
 import CertificadosScreen from '../screen/certificados';
-
+import CustomDrawer from '../components/CustomDrawer';
+ 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
-
+ 
 function DrawerNavigator() {
   return (
     <Drawer.Navigator
@@ -21,14 +23,15 @@ function DrawerNavigator() {
         drawerStyle: { width: 280 },
       }}
     >
+      <Drawer.Screen name="Dashboard"    component={Dashboard}          />
       <Drawer.Screen name="EnvioHoras1"  component={EnvioHoras1Screen}  />
       <Drawer.Screen name="EnvioHoras2"  component={EnvioHoras2Screen}  />
       <Drawer.Screen name="Notificacoes" component={NotificacoesScreen} />
-      <Stack.Screen name="certificados" component={CertificadosScreen} />
+      <Drawer.Screen name="Certificados" component={CertificadosScreen} />
     </Drawer.Navigator>
   );
 }
-
+ 
 export default function AppNavigator() {
   return (
     <NavigationContainer>
