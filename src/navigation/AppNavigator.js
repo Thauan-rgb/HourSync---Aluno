@@ -9,7 +9,7 @@ import EnvioHoras1Screen from '../screen/envioHoras1';
 import EnvioHoras2Screen from '../screen/envioHoras2';
 import NotificacoesScreen from '../screen/notificacoes';
 import CertificadosScreen from '../screen/certificados';
-import CustomDrawer from '../components/CustomDrawer';
+import CustomDrawer from '../components/Customdrawer';
  
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
