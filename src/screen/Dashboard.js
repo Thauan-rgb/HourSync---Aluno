@@ -1,54 +1,121 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, ScrollView } from 'react-native';
-import { useState } from 'react';
+import { StyleSheet, View, ScrollView, ActivityIndicator, Text } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 
 import DashboardHeader from '../components/DashboardHeader';
 import StatsCards from '../components/StatsCards';
 import ActivityList from '../components/ActivityList';
-
-const CURSOS = {
-  ads: {
-    nome: 'Análise e Desenvolvimento de Sistemas',
-    meta: 100,
-    aprovadas: 70,
-    pendentes: 5,
-    rejeitadas: 3,
-    atividades: [
-      { id: 1, nome: 'Curso de Python Avançado', horas: '20h', cat: 'Pesquisa de extensão', status: 'Aprovado' },
-      { id: 2, nome: 'Workshop de UX Design', horas: '5h', cat: 'Cultura e artes', status: 'Pendente' },
-      { id: 3, nome: 'Palestra de Empreendedorismo', horas: '3h', cat: 'Empreendedorismo', status: 'Rejeitado' },
-    ],
-  },
-  jogos: {
-    nome: 'Jogos Digitais',
-    meta: 80,
-    aprovadas: 20,
-    pendentes: 10,
-    rejeitadas: 5,
-    atividades: [
-      { id: 1, nome: 'Game Jam Recife 2024', horas: '12h', cat: 'Produção cultural', status: 'Aprovado' },
-      { id: 2, nome: 'Workshop Unity 3D', horas: '10h', cat: 'Capacitação técnica', status: 'Pendente' },
-      { id: 3, nome: 'Maratona de Programação', horas: '5h', cat: 'Competição', status: 'Rejeitado' },
-    ],
-  },
-};
+import { useAuth } from '../contexto/AuthContext';
+import { listarCertificados } from '../api/certificados';
+import { listarCursos } from '../api/cursos';
 
 export default function Dashboard({ navigation }) {
-  const [cursoKey, setCursoKey] = useState('ads');
+  const { token, usuario } = useAuth();
+  const [cursos, setCursos] = useState([]);
+  const [cursoKey, setCursoKey] = useState(null);
   const [open, setOpen] = useState(false);
-  const curso = CURSOS[cursoKey];
+  const [carregando, setCarregando] = useState(true);
+  const [dadosPorCurso, setDadosPorCurso] = useState({});
+
+  useFocusEffect(
+    useCallback(() => {
+      carregarDados();
+    }, [token, usuario])
+  );
+
+  async function carregarDados() {
+    try {
+      setCarregando(true);
+      const [todosCerts, todosCursos] = await Promise.all([
+        listarCertificados(token),
+        listarCursos(token),
+      ]);
+
+      const certDoAluno = Array.isArray(todosCerts)
+        ? todosCerts.filter((c) => {
+            const id = c.alunoId?._id || c.alunoId;
+            return id === usuario?.id || id === usuario?._id;
+          })
+        : [];
+
+      const cursosMap = {};
+      todosCursos.forEach((curso) => {
+        const certs = certDoAluno.filter((c) => {
+          const cid = c.cursoId?._id || c.cursoId;
+          return cid === curso._id;
+        });
+
+        const aprovadas = certs
+          .filter((c) => c.status === 'APROVADO')
+          .reduce((acc, c) => acc + (c.horasAprovadas || c.horas || 0), 0);
+
+        cursosMap[curso._id] = {
+          nome: curso.nome,
+          meta: curso.horasExigidas || 0,
+          aprovadas,
+          pendentes: certs.filter((c) => c.status === 'PENDENTE').length,
+          rejeitadas: certs.filter((c) => c.status === 'REJEITADO').length,
+          atividades: certs.map((c) => ({
+            id: c._id,
+            nome: c.titulo,
+            horas: `${c.horas}h`,
+            cat: c.categoriaId?.nome || '—',
+            status:
+              c.status === 'APROVADO'
+                ? 'Aprovado'
+                : c.status === 'REJEITADO'
+                ? 'Rejeitado'
+                : 'Pendente',
+          })),
+        };
+      });
+
+      setDadosPorCurso(cursosMap);
+
+      const primeiroId = Object.keys(cursosMap)[0] || null;
+      setCursoKey((prev) => (prev && cursosMap[prev] ? prev : primeiroId));
+      setCursos(todosCursos);
+    } catch (e) {
+      console.warn('Erro ao carregar dashboard:', e);
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  if (carregando) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#56C3DC" />
+      </View>
+    );
+  }
+
+  if (!cursoKey) {
+    return (
+      <View style={styles.loading}>
+        <Text style={{ color: '#888' }}>Nenhum curso encontrado.</Text>
+      </View>
+    );
+  }
+
+  const curso = dadosPorCurso[cursoKey];
+
+  const CURSOS_DISPLAY = {};
+  cursos.forEach((c) => {
+    if (dadosPorCurso[c._id]) CURSOS_DISPLAY[c._id] = dadosPorCurso[c._id];
+  });
 
   return (
     <View style={styles.root}>
       <ScrollView style={styles.wrapper} contentContainerStyle={styles.container}>
-
         <DashboardHeader
           navigation={navigation}
           curso={curso}
           cursoKey={cursoKey}
           open={open}
           setOpen={setOpen}
-          CURSOS={CURSOS}
+          CURSOS={CURSOS_DISPLAY}
           setCursoKey={setCursoKey}
         />
 
@@ -67,6 +134,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#fff' },
   wrapper: { flex: 1 },
   container: { flexGrow: 1 },
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   content: {
     backgroundColor: '#fff',
     borderTopLeftRadius: 28,
