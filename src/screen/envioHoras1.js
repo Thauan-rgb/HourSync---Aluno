@@ -19,10 +19,20 @@ export default function EnvioHoras1Screen({ navigation }) {
       Alert.alert('Atenção', 'Preencha curso, categoria e horas.');
       return;
     }
-    navigation.navigate('EnvioHoras2', {
-      cursoNome, cursoId,
-      categoriaNome, categoriaId,
-      horas, data, arquivo,
+
+    let dataConvertida = undefined;
+    if (data) {
+      const partes = data.split('/');
+      dataConvertida = `${partes[2]}-${partes[1]}-${partes[0]}`;
+    }
+
+    navigation.navigate('Main', {
+      screen: 'EnvioHoras2',
+      params: {
+        cursoNome, cursoId,
+        categoriaNome, categoriaId,
+        horas, data: dataConvertida, arquivo,
+      },
     });
   }
 
