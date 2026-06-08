@@ -1,88 +1,87 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function ActivityCard({ dados }) {
-  const arquivo = dados?.arquivo;
-  const nomeArquivo = arquivo?.fileName || arquivo?.uri?.split('/').pop() || 'certificado';
+const STATUS_CONFIG = {
+  Aprovado:  { bg: '#E8F5E9', color: '#2E7D32', icon: 'checkmark-circle' },
+  Pendente:  { bg: '#FFF8E1', color: '#F57F17', icon: 'time'             },
+  Rejeitado: { bg: '#FFEBEE', color: '#C62828', icon: 'close-circle'     },
+};
+
+export default function ActivityList({ atividades }) {
+  if (!atividades || atividades.length === 0) {
+    return (
+      <Text style={styles.empty}>Nenhuma atividade enviada ainda.</Text>
+    );
+  }
 
   return (
-    <View style={styles.card}>
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Dados da atividade</Text>
-      </View>
-
-      <View style={styles.dataRow}>
-        <Text style={styles.dataLabel}>Curso</Text>
-        <Text style={styles.dataValue}>{dados?.cursoNome || '—'}</Text>
-      </View>
-
-      <View style={styles.dataRow}>
-        <Text style={styles.dataLabel}>Categoria</Text>
-        <Text style={styles.dataValue}>{dados?.categoriaNome || '—'}</Text>
-      </View>
-
-      <View style={styles.dataRow}>
-        <Text style={styles.dataLabel}>Horas</Text>
-        <Text style={styles.dataValue}>{dados?.horas ? `${dados.horas}h` : '—'}</Text>
-      </View>
-
-      <View style={styles.dataRow}>
-        <Text style={styles.dataLabel}>Data de Submissão</Text>
-        <Text style={styles.dataValue}>{dados?.data || '—'}</Text>
-      </View>
-
-      <View style={styles.divider} />
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Certificado</Text>
-      </View>
-
-      {arquivo ? (
-        <View style={styles.pdfRow}>
-          <View style={styles.pdfIcon}>
-            <Text style={styles.pdfIconText}>ARQ</Text>
+    <View>
+      <Text style={styles.sectionTitle}>Atividades recentes</Text>
+      {atividades.map((item, index) => {
+        const config = STATUS_CONFIG[item.status] || STATUS_CONFIG.Pendente;
+        const isLast = index === atividades.length - 1;
+        return (
+          <View
+            key={item.id}
+            style={[styles.activityRow, !isLast && styles.activityBorder]}
+          >
+            <View style={[styles.actIcon, { backgroundColor: config.bg }]}>
+              <Ionicons name={config.icon} size={18} color={config.color} />
+            </View>
+            <View style={styles.actBody}>
+              <Text style={styles.actName} numberOfLines={1}>{item.nome}</Text>
+              <Text style={styles.actMeta}>{item.cat}</Text>
+            </View>
+            <View style={[styles.badge, { backgroundColor: config.bg }]}>
+              <Text style={[styles.badgeText, { color: config.color }]}>
+                {item.horas}
+              </Text>
+            </View>
           </View>
-          <View style={styles.pdfInfo}>
-            <Text style={styles.pdfName}>{nomeArquivo}</Text>
-            <Text style={styles.pdfMeta}>Selecionado</Text>
-          </View>
-        </View>
-      ) : (
-        <Text style={{ color: '#999', fontSize: 13 }}>Nenhum arquivo anexado</Text>
-      )}
-
-      <View style={styles.readyBanner}>
-        <Text style={styles.readyText}>Pronto para envio</Text>
-        <Text style={styles.readySubtext}>
-          Ao enviar, suas informações serão encaminhadas para análise da coordenação.
-        </Text>
-      </View>
-
+        );
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: '#fff', borderRadius: 16, padding: 16, gap: 12 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sectionTitle: { fontWeight: 'bold', fontSize: 15, color: '#222' },
-  dataRow: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    borderBottomWidth: 1, borderBottomColor: '#F0F0F0', paddingBottom: 20,
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#222',
+    marginBottom: 8,
+    marginTop: 8,
   },
-  dataLabel: { color: '#888', fontSize: 13 },
-  dataValue: { color: '#222', fontSize: 13, fontWeight: '500' },
-  divider: { height: 2, backgroundColor: '#F0F0F0' },
-  pdfRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#FFF5F5', padding: 10, borderRadius: 8,
+  empty: {
+    fontSize: 13,
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 20,
   },
-  pdfIcon: { backgroundColor: '#E53935', borderRadius: 6, padding: 6 },
-  pdfIconText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
-  pdfInfo: { flex: 1 },
-  pdfName: { fontSize: 13, fontWeight: '500', color: '#222' },
-  pdfMeta: { fontSize: 11, color: '#888' },
-  readyBanner: { backgroundColor: '#E8F5E9', borderRadius: 8, padding: 12, gap: 4 },
-  readyText: { fontWeight: 'bold', color: '#2E7D32', fontSize: 13 },
-  readySubtext: { color: '#555', fontSize: 12 },
+  activityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    gap: 12,
+  },
+  activityBorder: {
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#EBEBEB',
+  },
+  actIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actBody: { flex: 1 },
+  actName: { fontSize: 13, fontWeight: '500', color: '#222' },
+  actMeta: { fontSize: 11, color: '#888', marginTop: 2 },
+  badge: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  badgeText: { fontSize: 11, fontWeight: '500' },
 });
