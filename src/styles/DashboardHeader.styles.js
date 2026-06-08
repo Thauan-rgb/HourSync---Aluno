@@ -8,7 +8,6 @@ export default StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
   },
-
   nav: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -16,9 +15,7 @@ export default StyleSheet.create({
     width: '100%',
     marginBottom: 16,
   },
-
   navTitle: { fontSize: 17, fontWeight: '600', color: '#fff' },
-
   coursePill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -32,21 +29,18 @@ export default StyleSheet.create({
     marginBottom: 20,
     maxWidth: '90%',
   },
-
   coursePillText: { fontSize: 12, color: '#fff', fontWeight: '500', flexShrink: 1 },
-
   dropdown: {
     position: 'absolute',
-    top: 130,
+    top: 160,
     alignSelf: 'center',
     width: '80%',
     borderRadius: 14,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.35)',
-    overflow: 'hidden',
+    backgroundColor: '#54C1DD',
     zIndex: 999,
   },
-
   dropdownItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -54,11 +48,9 @@ export default StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
-
   dropdownBorder: { borderBottomWidth: 0.5, borderBottomColor: 'rgba(255,255,255,0.3)' },
-  dropdownText: { fontSize: 13, color: '#fff', flex: 1 },
+  dropdownText: { fontSize: 13, color: 'rgba(255,255,255,0.8)', flex: 1 },
   dropdownTextActive: { color: '#fff', fontWeight: '700' },
-
   ringWrap: { alignItems: 'center', justifyContent: 'center' },
   ringCenter: { position: 'absolute', alignItems: 'center' },
   ringValue: { fontSize: 32, fontWeight: '700', color: '#fff' },
