@@ -1,24 +1,35 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
- 
+import { DrawerActions } from '@react-navigation/native';
+
 export default function NotificacoesScreen({ navigation }) {
   return (
     <View style={styles.container}>
- 
+
       <View style={styles.header}>
-        <TouchableOpacity style={styles.menuButton} onPress={() => navigation.openDrawer()}>
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        >
           <Ionicons name="options" size={24} color="#fff" />
         </TouchableOpacity>
+
         <View style={styles.headerTextContainer}>
           <Text style={styles.headerTitle}>Notificações</Text>
           <Text style={styles.headerSubtitle}>Acompanhe suas notificações</Text>
         </View>
-        <View style={{ width: 44 }} />
+
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={() => navigation.navigate('Notificacoes')}
+        >
+          <Ionicons name="notifications-outline" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
- 
+
       <ScrollView contentContainerStyle={styles.content}>
- 
+
         <View style={styles.card}>
           <View style={styles.iconContainerSuccess}>
             <Ionicons name="checkmark-sharp" size={24} color="#00A896" />
@@ -28,7 +39,7 @@ export default function NotificacoesScreen({ navigation }) {
             <Text style={styles.cardDescription}>Seu certificado foi enviado com sucesso para análise.</Text>
           </View>
         </View>
- 
+
         <View style={styles.card}>
           <View style={styles.iconContainerDanger}>
             <Ionicons name="close-sharp" size={24} color="#E63946" />
@@ -38,7 +49,7 @@ export default function NotificacoesScreen({ navigation }) {
             <Text style={styles.cardDescription}>Seu certificado foi rejeitado, clique e saiba o porquê.</Text>
           </View>
         </View>
- 
+
         <View style={styles.card}>
           <View style={styles.iconContainerCyan}>
             <Text style={styles.textIcon}>+5</Text>
@@ -48,7 +59,7 @@ export default function NotificacoesScreen({ navigation }) {
             <Text style={styles.cardDescription}>Parabéns! Você recebeu mais 5 horas complementares.</Text>
           </View>
         </View>
- 
+
         <View style={styles.card}>
           <View style={styles.iconContainerCyanLight}>
             <Ionicons name="trophy" size={24} color="#4eb5e5" />
@@ -58,7 +69,7 @@ export default function NotificacoesScreen({ navigation }) {
             <Text style={styles.cardDescription}>Você atingiu a marca de 50h registradas.</Text>
           </View>
         </View>
- 
+
         <View style={styles.card}>
           <View style={styles.iconContainerBlue}>
             <Ionicons name="document-text" size={24} color="#4A90E2" />
@@ -68,12 +79,13 @@ export default function NotificacoesScreen({ navigation }) {
             <Text style={styles.cardDescription}>Uma nova categoria foi adicionada a seu curso de ADS.</Text>
           </View>
         </View>
- 
+
+        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
 }
- 
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FA' },
   content: { alignItems: 'center', paddingTop: 20, paddingBottom: 40 },
