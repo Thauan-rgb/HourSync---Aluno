@@ -1,10 +1,10 @@
-# HourSync — App do Aluno 📱
+# HourSync — App do Aluno 
 
 > Aplicativo mobile para gerenciamento de horas complementares, desenvolvido em React Native com Expo. Permite que alunos enviem certificados, acompanhem o progresso de horas por curso e visualizem o status de aprovação de cada atividade.
 
 ---
 
-## 📋 Sumário
+##  Sumário
 
 - [Sobre o Projeto](#sobre-o-projeto)
 - [Funcionalidades](#funcionalidades)
@@ -176,20 +176,20 @@ export const BASE_URL = 'http://192.168.x.x:3000'; // ex: backend rodando localm
 
 ## Telas
 
-### 🔐 Login
+###  Login
 Tela inicial do app. O aluno insere e-mail e senha para autenticar. Após o login bem-sucedido, o token JWT é armazenado no contexto global e o usuário é redirecionado ao Dashboard.
 
-### 🔑 Esqueceu a Senha
+###  Esqueceu a Senha
 Permite que o aluno informe seu e-mail para receber um link de redefinição de senha.
 
-### 📊 Dashboard
+###  Dashboard
 Tela principal após o login. Exibe:
 - Progresso de horas complementares do curso selecionado (aprovadas vs. meta);
 - Contagem de certificados pendentes e rejeitados;
 - Lista de atividades enviadas com status visual;
 - Dropdown para alternar entre cursos (quando o aluno está matriculado em mais de um).
 
-### 📤 Envio de Horas — Passo 1
+###  Envio de Horas — Passo 1
 Formulário de envio de certificado. O aluno preenche:
 - Curso (dropdown com busca na API);
 - Categoria da atividade (dropdown);
@@ -197,15 +197,15 @@ Formulário de envio de certificado. O aluno preenche:
 - Data de emissão (opcional);
 - Arquivo (foto ou PDF do certificado).
 
-### ✅ Envio de Horas — Passo 2
+###  Envio de Horas — Passo 2
 Tela de revisão antes do envio final. Exibe um resumo dos dados preenchidos e permite confirmar ou voltar para editar.
 
-### 📄 Certificados
+###  Certificados
 Lista todos os certificados enviados pelo aluno. Oferece:
 - Barra de busca por título;
 - Filtros rápidos por status: Todos, Pendentes, Rejeitados, Aprovados.
 
-### 🔔 Notificações
+###  Notificações
 Exibe notificações sobre o andamento dos certificados (aprovações, rejeições, marcos de horas atingidos e novas categorias disponíveis).
 
 ---
