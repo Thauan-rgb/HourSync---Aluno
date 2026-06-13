@@ -156,4 +156,4 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
 });
-            id: c._i
+    
