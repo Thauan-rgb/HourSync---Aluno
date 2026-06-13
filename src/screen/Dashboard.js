@@ -69,4 +69,91 @@ export default function Dashboard({ navigation }) {
           pendentes: certs.filter((c) => c.status === 'PENDENTE').length,
           rejeitadas: certs.filter((c) => c.status === 'REJEITADO').length,
           atividades: certs.map((c) => ({
+                  id: c._id,
+            nome: c.titulo,
+            horas: `${c.horas}h`,
+            cat: c.categoriaId?.nome || '—',
+            status:
+              c.status === 'APROVADO'
+                ? 'Aprovado'
+                : c.status === 'REJEITADO'
+                ? 'Rejeitado'
+                : 'Pendente',
+          })),
+        };
+      });
+
+      setDadosPorCurso(cursosMap);
+
+      const primeiroId = Object.keys(cursosMap)[0] || null;
+      setCursoKey((prev) => (prev && cursosMap[prev] ? prev : primeiroId));
+      setCursos(todosCursos);
+    } catch (e) {
+      console.warn('Erro ao carregar dashboard:', e);
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  if (carregando) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#56C3DC" />
+      </View>
+    );
+  }
+
+  if (!cursoKey) {
+    return (
+      <View style={styles.loading}>
+        <Text style={{ color: '#888' }}>Nenhum curso encontrado.</Text>
+      </View>
+    );
+  }
+
+  const curso = dadosPorCurso[cursoKey];
+
+  const CURSOS_DISPLAY = {};
+  cursos.forEach((c) => {
+    if (dadosPorCurso[c._id]) CURSOS_DISPLAY[c._id] = dadosPorCurso[c._id];
+  });
+
+  return (
+    <View style={styles.root}>
+      <ScrollView style={styles.wrapper} contentContainerStyle={styles.container}>
+        <DashboardHeader
+          navigation={navigation}
+          curso={curso}
+          cursoKey={cursoKey}
+          open={open}
+          setOpen={setOpen}
+          CURSOS={CURSOS_DISPLAY}
+          setCursoKey={setCursoKey}
+        />
+
+        <View style={styles.content}>
+          <StatsCards curso={curso} />
+          <ActivityList atividades={curso.atividades} />
+        </View>
+
+        <StatusBar style="light" />
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#fff' },
+  wrapper: { flex: 1 },
+  container: { flexGrow: 1 },
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  content: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: -28,
+    padding: 20,
+    paddingTop: 24,
+  },
+});
             id: c._i
