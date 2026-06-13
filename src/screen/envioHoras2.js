@@ -11,15 +11,21 @@ import { criarCertificado } from '../api/certificados';
 export default function EnvioHoras2Screen({ navigation, route }) {
   const { token, usuario } = useAuth();
   const dados = route.params || {};
+
+  // Estado de carregamento do envio
   const [carregando, setCarregando] = useState(false);
+
+  // Controla a exibição do modal de sucesso
   const [modalSucesso, setModalSucesso] = useState(false);
 
+  // Envia os dados do certificado para a API
   async function handleEnviar() {
     if (!dados.cursoId || !dados.categoriaId) {
       return;
     }
 
     setCarregando(true);
+
     try {
       const resultado = await criarCertificado(
         {
@@ -34,6 +40,7 @@ export default function EnvioHoras2Screen({ navigation, route }) {
         token
       );
 
+      // Exibe o modal caso o envio seja concluído
       if (resultado._id || resultado.id) {
         setModalSucesso(true);
       }
@@ -47,30 +54,50 @@ export default function EnvioHoras2Screen({ navigation, route }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.container}>
+
+        {/* Cabeçalho da tela */}
         <Header />
 
+        {/* Área principal do conteúdo */}
         <View style={styles.contentWrapper}>
           <ScrollView style={styles.content}>
+
+            {/* Banner de revisão */}
             <ReviewBanner />
+
+            {/* Card com os dados da atividade */}
             <ActivityCard dados={dados} />
+
           </ScrollView>
         </View>
 
-        <SubmitButton onPress={handleEnviar} carregando={carregando} />
+        {/* Botão de envio */}
+        <SubmitButton
+          onPress={handleEnviar}
+          carregando={carregando}
+        />
+
       </View>
 
       {/* Modal de Sucesso */}
       <Modal visible={modalSucesso} transparent animationType="fade">
         <View style={modalStyles.overlay}>
           <View style={modalStyles.caixa}>
+
+            {/* Título do modal */}
             <Text style={modalStyles.titulo}>Enviado!</Text>
+
+            {/* Mensagem de confirmação */}
             <Text style={modalStyles.subtitulo}>
               Certificado enviado para análise com sucesso.
             </Text>
+
+            {/* Botão para retornar ao Dashboard */}
             <TouchableOpacity
               style={modalStyles.botao}
               onPress={() => {
                 setModalSucesso(false);
+
                 navigation.reset({
                   index: 0,
                   routes: [{ name: 'Main', params: { screen: 'Dashboard' } }],
@@ -79,6 +106,7 @@ export default function EnvioHoras2Screen({ navigation, route }) {
             >
               <Text style={modalStyles.botaoTexto}>OK</Text>
             </TouchableOpacity>
+
           </View>
         </View>
       </Modal>
