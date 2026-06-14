@@ -4,106 +4,104 @@ import { useState, useCallback } from 'react';
 import { useFocusEffect, DrawerActions } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Circle } from 'react-native-svg';
- 
+
 import { useAuth } from '../contexto/AuthContext';
 import { listarCertificados } from '../api/certificados';
 import { listarCursos } from '../api/cursos';
- 
+
 const RAIO = 58;
 const CIRC = 2 * Math.PI * RAIO;
- 
+
 const STATUS_CONFIG = {
   Aprovado:  { bg: '#E8F5E9', color: '#2E7D32', icon: 'checkmark-circle' },
   Pendente:  { bg: '#FFF8E1', color: '#F57F17', icon: 'time'             },
   Rejeitado: { bg: '#FFEBEE', color: '#C62828', icon: 'close-circle'     },
 };
- 
+
 export default function Dashboard({ navigation }) {
   const { token, usuario } = useAuth();
-  const [cursos, setCursos] = useState([]);
   const [cursoKey, setCursoKey] = useState(null);
-  const [open, setOpen] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [dadosPorCurso, setDadosPorCurso] = useState({});
- 
+
   useFocusEffect(
     useCallback(() => {
       carregarDados();
     }, [token, usuario])
   );
- 
+
   async function carregarDados() {
     try {
       setCarregando(true);
- 
+
       const [todosCerts, todosCursos] = await Promise.all([
         listarCertificados(token),
         listarCursos(token),
       ]);
- 
-      // certificados do aluno logado
+
       const certDoAluno = Array.isArray(todosCerts)
         ? todosCerts.filter((c) => {
             const id = c.alunoId?._id || c.alunoId;
             return id === usuario?.id || id === usuario?._id;
           })
         : [];
- 
-      // cursos que o aluno está matriculado via usuario.cursoId
-      const cursoIdsDoAluno = usuario?.cursoId || [];
-      const cursosDoAluno = Array.isArray(todosCursos)
-        ? todosCursos.filter((c) =>
-            cursoIdsDoAluno.some(
-              (id) => id?.toString() === c._id?.toString()
-            )
-          )
-        : [];
- 
-      // monta o mapa de dados por curso
+
+      const cursoIdsDoAluno = (usuario?.cursoId || []).map((c) =>
+        (c._id || c)?.toString()
+      );
+
+      const cursosDoAluno =
+        cursoIdsDoAluno.length > 0
+          ? (Array.isArray(todosCursos)
+              ? todosCursos.filter((c) => cursoIdsDoAluno.includes(c._id?.toString()))
+              : [])
+          : (Array.isArray(todosCursos) ? todosCursos : []);
+
       const cursosMap = {};
       cursosDoAluno.forEach((curso) => {
         const certs = certDoAluno.filter((c) => {
           const cid = c.cursoId?._id || c.cursoId;
           return cid?.toString() === curso._id?.toString();
         });
- 
+
         const aprovadas = certs
           .filter((c) => c.status === 'APROVADO')
           .reduce((acc, c) => acc + (c.horasAprovadas || c.horas || 0), 0);
- 
+
+        const somarHoras = (status) =>
+          certs
+            .filter((c) => c.status === status)
+            .reduce((acc, c) => acc + (c.horas || 0), 0);
+
         cursosMap[curso._id] = {
           nome: curso.nome,
           meta: curso.horasExigidas || 0,
           aprovadas,
-          pendentes: certs.filter((c) => c.status === 'PENDENTE').length,
-          rejeitadas: certs.filter((c) => c.status === 'REJEITADO').length,
+          pendentes: somarHoras('PENDENTE'),
+          rejeitadas: somarHoras('REJEITADO'),
           atividades: certs.map((c) => ({
             id: c._id,
             nome: c.titulo,
-            horas: `${c.horas}h`,
+            horas: ${c.horas}h,
             cat: c.categoriaId?.nome || '—',
             status:
-              c.status === 'APROVADO'
-                ? 'Aprovado'
-                : c.status === 'REJEITADO'
-                ? 'Rejeitado'
-                : 'Pendente',
+              c.status === 'APROVADO' ? 'Aprovado'
+              : c.status === 'REJEITADO' ? 'Rejeitado'
+              : 'Pendente',
           })),
         };
       });
- 
+
       setDadosPorCurso(cursosMap);
- 
       const primeiroId = Object.keys(cursosMap)[0] || null;
       setCursoKey((prev) => (prev && cursosMap[prev] ? prev : primeiroId));
-      setCursos(todosCursos);
     } catch (e) {
       console.warn('Erro ao carregar dashboard:', e);
     } finally {
       setCarregando(false);
     }
   }
- 
+
   if (carregando) {
     return (
       <View style={styles.loading}>
@@ -111,7 +109,7 @@ export default function Dashboard({ navigation }) {
       </View>
     );
   }
- 
+
   if (!cursoKey) {
     return (
       <View style={styles.loading}>
@@ -119,26 +117,19 @@ export default function Dashboard({ navigation }) {
       </View>
     );
   }
- 
+
   const curso = dadosPorCurso[cursoKey];
- 
-  const CURSOS_DISPLAY = {};
-  cursos.forEach((c) => {
-    if (dadosPorCurso[c._id]) CURSOS_DISPLAY[c._id] = dadosPorCurso[c._id];
-  });
- 
+  const cursoEntries = Object.entries(dadosPorCurso);
   const aprovadas = curso.aprovadas || 0;
   const meta = curso.meta || 1;
-  const offset = CIRC - (aprovadas / meta) * CIRC;
-  const totalCursos = Object.keys(CURSOS_DISPLAY).length;
- 
+  const offset = Math.max(0, CIRC - (aprovadas / meta) * CIRC);
+
   return (
     <View style={styles.root}>
       <ScrollView style={styles.wrapper} contentContainerStyle={styles.container}>
- 
-        {/* ===== Header ===== */}
+
         <View style={styles.header}>
- 
+
           <View style={styles.nav}>
             <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
               <Ionicons name="menu-outline" size={24} color="#fff" />
@@ -148,31 +139,34 @@ export default function Dashboard({ navigation }) {
               <Ionicons name="notifications-outline" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
- 
-          {/* Pill do curso selecionado — só aparece se tiver mais de 1 curso */}
-          {totalCursos > 1 && (
-            <TouchableOpacity style={styles.coursePill} onPress={() => setOpen(!open)}>
-              <Text style={styles.coursePillText} numberOfLines={1}>{curso.nome}</Text>
-              <Ionicons
-                name={open ? 'chevron-up-outline' : 'chevron-down-outline'}
-                size={14} color="#fff"
-              />
-            </TouchableOpacity>
-          )}
- 
-          {totalCursos === 1 && (
-            <View style={styles.coursePill}>
-              <Text style={styles.coursePillText} numberOfLines={1}>{curso.nome}</Text>
-            </View>
-          )}
- 
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabsContent}
+            style={styles.tabsScroll}
+          >
+            {cursoEntries.map(([key, c]) => (
+              <TouchableOpacity
+                key={key}
+                style={[styles.tab, cursoKey === key && styles.tabActive]}
+                onPress={() => setCursoKey(key)}
+              >
+                <Text style={[styles.tabText, cursoKey === key && styles.tabTextActive]}
+                  numberOfLines={1}>
+                  {c.nome}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
           <View style={styles.ringWrap}>
             <Svg width={150} height={150} viewBox="0 0 150 150">
               <Circle cx={75} cy={75} r={RAIO} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth={12} />
               <Circle
                 cx={75} cy={75} r={RAIO}
                 fill="none" stroke="#fff" strokeWidth={12}
-                strokeDasharray={`${CIRC}`}
+                strokeDasharray={${CIRC}}
                 strokeDashoffset={offset}
                 strokeLinecap="round"
                 rotation={-90} origin="75,75"
@@ -183,34 +177,11 @@ export default function Dashboard({ navigation }) {
               <Text style={styles.ringTotal}>/{meta}h</Text>
             </View>
           </View>
- 
+
         </View>
- 
-        {/* Dropdown de cursos — só aparece se tiver mais de 1 curso */}
-        {open && totalCursos > 1 && (
-          <View style={styles.dropdown}>
-            {Object.entries(CURSOS_DISPLAY).map(([key, c], index) => (
-              <TouchableOpacity
-                key={key}
-                style={[
-                  styles.dropdownItem,
-                  index < totalCursos - 1 && styles.dropdownBorder,
-                ]}
-                onPress={() => { setCursoKey(key); setOpen(false); }}
-              >
-                <Text style={[styles.dropdownText, cursoKey === key && styles.dropdownTextActive]}>
-                  {c.nome}
-                </Text>
-                {cursoKey === key && <Ionicons name="checkmark" size={16} color="#fff" />}
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
- 
-        {/* ===== Conteúdo ===== */}
+
         <View style={styles.content}>
- 
-          {/* Cards de estatísticas */}
+
           <View style={styles.cardsGrid}>
             <View style={[styles.card, styles.cardBlue]}>
               <Text style={[styles.cardLabel, { color: '#185FA5' }]}>Horas totais</Text>
@@ -222,15 +193,14 @@ export default function Dashboard({ navigation }) {
             </View>
             <View style={[styles.card, styles.cardTeal]}>
               <Text style={[styles.cardLabel, { color: '#0F6E56' }]}>Horas restantes</Text>
-              <Text style={[styles.cardValue, { color: '#085041' }]}>{curso.meta - curso.aprovadas}h</Text>
+              <Text style={[styles.cardValue, { color: '#085041' }]}>{Math.max(0, curso.meta - curso.aprovadas)}h</Text>
             </View>
             <View style={[styles.card, styles.cardRed]}>
               <Text style={[styles.cardLabel, { color: '#A32D2D' }]}>Rejeitados</Text>
               <Text style={[styles.cardValue, { color: '#791F1F' }]}>{curso.rejeitadas}h</Text>
             </View>
           </View>
- 
-          {/* Lista de atividades recentes */}
+
           {(!curso.atividades || curso.atividades.length === 0) ? (
             <Text style={styles.empty}>Nenhuma atividade enviada ainda.</Text>
           ) : (
@@ -262,15 +232,14 @@ export default function Dashboard({ navigation }) {
             </View>
           )}
         </View>
- 
+
         <StatusBar style="light" />
       </ScrollView>
     </View>
   );
 }
- 
+
 const styles = StyleSheet.create({
-  // Layout geral
   root: { flex: 1, backgroundColor: '#fff' },
   wrapper: { flex: 1 },
   container: { flexGrow: 1 },
@@ -283,8 +252,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 24,
   },
- 
-  // Header (DashboardHeader)
+
   header: {
     backgroundColor: '#54C1DD',
     paddingTop: 52,
@@ -300,47 +268,36 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   navTitle: { fontSize: 17, fontWeight: '600', color: '#fff' },
-  coursePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.22)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
+
+  tabsScroll: { flexGrow: 0, marginBottom: 20 },
+  tabsContent: { gap: 8, paddingHorizontal: 4 },
+  tab: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
     borderRadius: 999,
-    paddingVertical: 7,
-    paddingHorizontal: 16,
-    marginBottom: 20,
-    maxWidth: '90%',
-  },
-  coursePillText: { fontSize: 12, color: '#fff', fontWeight: '500', flexShrink: 1 },
-  dropdown: {
-    position: 'absolute',
-    top: 160,
-    alignSelf: 'center',
-    width: '80%',
-    borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
-    backgroundColor: '#54C1DD',
-    zIndex: 999,
+    borderColor: 'rgba(255,255,255,0.4)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    maxWidth: 180,
   },
-  dropdownItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+  tabActive: {
+    backgroundColor: '#fff',
   },
-  dropdownBorder: { borderBottomWidth: 0.5, borderBottomColor: 'rgba(255,255,255,0.3)' },
-  dropdownText: { fontSize: 13, color: 'rgba(255,255,255,0.8)', flex: 1 },
-  dropdownTextActive: { color: '#fff', fontWeight: '700' },
+  tabText: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: '500',
+  },
+  tabTextActive: {
+    color: '#54C1DD',
+    fontWeight: '700',
+  },
+
   ringWrap: { alignItems: 'center', justifyContent: 'center' },
   ringCenter: { position: 'absolute', alignItems: 'center' },
   ringValue: { fontSize: 32, fontWeight: '700', color: '#fff' },
   ringTotal: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2 },
- 
-  // Cards (StatsCards)
+
   cardsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
   card: { width: '47.5%', borderRadius: 12, padding: 14, gap: 4 },
   cardBlue:  { backgroundColor: '#E6F1FB' },
@@ -349,46 +306,19 @@ const styles = StyleSheet.create({
   cardRed:   { backgroundColor: '#FCEBEB' },
   cardLabel: { fontSize: 12, fontWeight: '500' },
   cardValue: { fontSize: 22, fontWeight: '700' },
- 
-  // Lista de atividades (ActivityList)
+
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#222',
-    marginBottom: 8,
-    marginTop: 8,
+    fontSize: 15, fontWeight: '600', color: '#222',
+    marginBottom: 8, marginTop: 8,
   },
-  empty: {
-    fontSize: 13,
-    color: '#999',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  activityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    gap: 12,
-  },
-  activityBorder: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#EBEBEB',
-  },
-  actIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  empty: { fontSize: 13, color: '#999', textAlign: 'center', marginTop: 20 },
+  activityRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 12 },
+  activityBorder: { borderBottomWidth: 0.5, borderBottomColor: '#EBEBEB' },
+  actIcon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   actBody: { flex: 1 },
   actName: { fontSize: 13, fontWeight: '500', color: '#222' },
   actMeta: { fontSize: 11, color: '#888', marginTop: 2 },
-  badge: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
+  badge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   badgeText: { fontSize: 11, fontWeight: '500' },
 });
     
