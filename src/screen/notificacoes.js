@@ -2,8 +2,25 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
+import { useNotificacoes } from '../contexto/NotificacoesContext';
+
+const TIPO_CONFIG = {
+  certificado_enviado: {
+    icon: 'cloud-upload-outline',
+    cor: '#00A896',
+    bg: 'rgba(0, 168, 150, 0.1)',
+  },
+};
+
+const CONFIG_PADRAO = {
+  icon: 'notifications-outline',
+  cor: '#4A90E2',
+  bg: 'rgba(74, 144, 226, 0.1)',
+};
 
 export default function NotificacoesScreen({ navigation }) {
+  const { notificacoes } = useNotificacoes();
+
   return (
     <View style={styles.container}>
 
@@ -12,7 +29,7 @@ export default function NotificacoesScreen({ navigation }) {
           style={styles.menuButton}
           onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
         >
-          <Ionicons name="options" size={24} color="#fff" />
+          <Ionicons name="menu-outline" size={24} color="#fff" />
         </TouchableOpacity>
 
         <View style={styles.headerTextContainer}>
@@ -20,65 +37,33 @@ export default function NotificacoesScreen({ navigation }) {
           <Text style={styles.headerSubtitle}>Acompanhe suas notificações</Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={() => navigation.navigate('Notificacoes')}
-        >
-          <Ionicons name="notifications-outline" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.menuButton} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
 
-        <View style={styles.card}>
-          <View style={styles.iconContainerSuccess}>
-            <Ionicons name="checkmark-sharp" size={24} color="#00A896" />
+        {notificacoes.length === 0 ? (
+          <View style={styles.vazio}>
+            <Ionicons name="notifications-off-outline" size={48} color="#ccc" />
+            <Text style={styles.vazioTexto}>Nenhuma notificação ainda.</Text>
           </View>
-          <View style={styles.cardTextContainer}>
-            <Text style={styles.cardTitle}>Certificado enviado com sucesso</Text>
-            <Text style={styles.cardDescription}>Seu certificado foi enviado com sucesso para análise.</Text>
-          </View>
-        </View>
-
-        <View style={styles.card}>
-          <View style={styles.iconContainerDanger}>
-            <Ionicons name="close-sharp" size={24} color="#E63946" />
-          </View>
-          <View style={styles.cardTextContainer}>
-            <Text style={styles.cardTitle}>Certificado rejeitado!</Text>
-            <Text style={styles.cardDescription}>Seu certificado foi rejeitado, clique e saiba o porquê.</Text>
-          </View>
-        </View>
-
-        <View style={styles.card}>
-          <View style={styles.iconContainerCyan}>
-            <Text style={styles.textIcon}>+5</Text>
-          </View>
-          <View style={styles.cardTextContainer}>
-            <Text style={styles.cardTitle}>Suas horas foram aprovadas com sucesso</Text>
-            <Text style={styles.cardDescription}>Parabéns! Você recebeu mais 5 horas complementares.</Text>
-          </View>
-        </View>
-
-        <View style={styles.card}>
-          <View style={styles.iconContainerCyanLight}>
-            <Ionicons name="trophy" size={24} color="#4eb5e5" />
-          </View>
-          <View style={styles.cardTextContainer}>
-            <Text style={styles.cardTitle}>Parabéns!</Text>
-            <Text style={styles.cardDescription}>Você atingiu a marca de 50h registradas.</Text>
-          </View>
-        </View>
-
-        <View style={styles.card}>
-          <View style={styles.iconContainerBlue}>
-            <Ionicons name="document-text" size={24} color="#4A90E2" />
-          </View>
-          <View style={styles.cardTextContainer}>
-            <Text style={styles.cardTitle}>Nova categoria disponível</Text>
-            <Text style={styles.cardDescription}>Uma nova categoria foi adicionada a seu curso de ADS.</Text>
-          </View>
-        </View>
+        ) : (
+          notificacoes.map((n) => {
+            const config = TIPO_CONFIG[n.tipo] || CONFIG_PADRAO;
+            return (
+              <View key={n.id} style={styles.card}>
+                <View style={[styles.iconContainer, { backgroundColor: config.bg }]}>
+                  <Ionicons name={config.icon} size={24} color={config.cor} />
+                </View>
+                <View style={styles.cardTextContainer}>
+                  <Text style={styles.cardTitle}>{n.titulo}</Text>
+                  <Text style={styles.cardDescription}>{n.descricao}</Text>
+                  <Text style={styles.cardData}>{n.data}</Text>
+                </View>
+              </View>
+            );
+          })
+        )}
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -109,33 +94,18 @@ const styles = StyleSheet.create({
     borderRadius: 15, alignItems: 'center', width: '92%',
     borderWidth: 1, borderColor: '#EAEAEA', marginBottom: 12,
   },
-  cardTextContainer: { flex: 1, marginLeft: 20 },
+  cardTextContainer: { flex: 1, marginLeft: 14 },
   cardTitle: { fontWeight: 'bold', fontSize: 13, color: '#333', marginBottom: 3 },
-  cardDescription: { fontSize: 12, color: '#888' },
-  iconContainerSuccess: {
-    width: 44, height: 44, borderRadius: 4,
-    backgroundColor: 'rgba(0, 16, 150, 0.1)',
+  cardDescription: { fontSize: 12, color: '#888', lineHeight: 17 },
+  cardData: { fontSize: 11, color: '#bbb', marginTop: 4 },
+  iconContainer: {
+    width: 44, height: 44, borderRadius: 8,
     justifyContent: 'center', alignItems: 'center',
+    flexShrink: 0,
   },
-  iconContainerDanger: {
-    width: 44, height: 44, borderRadius: 4,
-    backgroundColor: 'rgba(230, 57, 70, 0.1)',
-    justifyContent: 'center', alignItems: 'center',
+  vazio: {
+    flex: 1, alignItems: 'center', justifyContent: 'center',
+    paddingTop: 80, gap: 12,
   },
-  iconContainerCyan: {
-    width: 44, height: 44, borderRadius: 4,
-    backgroundColor: 'rgba(91, 210, 225, 0.7)',
-    justifyContent: 'center', alignItems: 'center',
-  },
-  iconContainerCyanLight: {
-    width: 44, height: 44, borderRadius: 4,
-    backgroundColor: 'rgba(78, 181, 229, 0.1)',
-    justifyContent: 'center', alignItems: 'center',
-  },
-  iconContainerBlue: {
-    width: 44, height: 44, borderRadius: 4,
-    backgroundColor: 'rgba(74, 144, 226, 0.1)',
-    justifyContent: 'center', alignItems: 'center',
-  },
-  textIcon: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  vazioTexto: { color: '#aaa', fontSize: 14 },
 });
