@@ -33,7 +33,7 @@ export default function EnvioHoras2Screen({ navigation, route }) {
       if (resultado._id || resultado.id) {
         adicionarNotificacao({
           titulo: 'Certificado enviado com sucesso',
-          descricao: Seu certificado "${dados.atividadeNome || dados.categoriaNome || 'Certificado'}" foi enviado para análise da coordenação.,
+          descricao: `Seu certificado "${dados.atividadeNome || dados.categoriaNome || 'Certificado'}" foi enviado para análise da coordenação.`,
           tipo: 'certificado_enviado',
         });
         setModalSucesso(true);
