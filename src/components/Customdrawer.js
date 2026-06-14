@@ -6,8 +6,8 @@ import { useAuth } from '../contexto/AuthContext';
 const menuItems = [
   { label: 'Dashboard',      icon: 'home-outline',          screen: 'Dashboard'    },
   { label: 'Envio de Horas', icon: 'cloud-upload-outline',  screen: 'EnvioHoras1'  },
-  { label: 'Notificações',   icon: 'notifications-outline', screen: 'Notificacoes' },
   { label: 'Certificados',   icon: 'ribbon-outline',        screen: 'Certificados' },
+  { label: 'Notificações',   icon: 'notifications-outline', screen: 'Notificacoes' },
 ];
 
 export default function CustomDrawer(props) {
@@ -17,7 +17,9 @@ export default function CustomDrawer(props) {
 
   function handleSair() {
     setAuth({ token: null, usuario: null });
-    navigation.navigate('Login');
+    const parent = navigation.getParent();
+    const nav = parent || navigation;
+    nav.reset({ index: 0, routes: [{ name: 'Login' }] });
   }
 
   return (
