@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { View, ScrollView, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -118,7 +118,7 @@ export default function CertificadosScreen() {
                 tipo={c.status === 'APROVADO' ? 'aprovado' : c.status === 'REJEITADO' ? 'rejeitado' : 'pendente'}
                 titulo={c.titulo}
                 categoria={c.categoriaId?.nome || '—'}
-                dataEnvio={`Enviado em ${new Date(c.criadoEm).toLocaleDateString('pt-BR')}`}
+                dataEnvio={`Enviado em ${c.criadoEm ? new Date(c.criadoEm).toLocaleDateString('pt-BR') : '—'}`}
                 horas={c.status === 'APROVADO' ? `${c.horasAprovadas || c.horas}h validadas` : `${c.horas}h solicitadas`}
                 dataAprovacao={
                   c.status === 'APROVADO'
