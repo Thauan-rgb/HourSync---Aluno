@@ -1,17 +1,19 @@
 import { View, Text, StyleSheet, TouchableOpacity, Modal, FlatList } from 'react-native';
 import { useState } from 'react';
 
-export default function Dropdown({ label, opcoes, valor, onSelecionar }) {
+export default function Dropdown({ label, opcoes, valor, onSelecionar, desabilitado = false, placeholder = 'Selecione...' }) {
 
-  const [aberto, setAberto] = useState(false); // começa fechado, abre apenas ao clicar 
+  const [aberto, setAberto] = useState(false);
 
   return (
     <View>
       <Text style={styles.label}>{label}</Text>
 
-      <TouchableOpacity style={styles.dropdown} onPress={() => setAberto(true)}> {/* ao clicar, abre o modal */}
+      <TouchableOpacity
+        style={[styles.dropdown, desabilitado && styles.dropdownDesabilitado]}
+        onPress={() => !desabilitado && setAberto(true)}> {/* ao clicar, abre o modal */}
         <Text style={valor ? styles.textoSelecionado : styles.textoPlaceholder}>
-          {valor || 'Selecione...'}
+          {valor || placeholder}
         </Text>
         <Text>▼</Text>
       </TouchableOpacity>
@@ -24,7 +26,7 @@ export default function Dropdown({ label, opcoes, valor, onSelecionar }) {
 
             <FlatList // lista as opções de curso 
               data={opcoes}
-              keyExtractor={(item) => item} // cada item tem um id
+              keyExtractor={(item, index) => `${item}-${index}`}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.opcao}
@@ -57,6 +59,11 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 6,
     marginTop: 12,
+  },
+  dropdownDesabilitado: {
+    backgroundColor: '#F5F5F5',
+    borderColor: '#E0E0E0',
+    opacity: 0.7,
   },
   dropdown: {
     backgroundColor: '#fff',
