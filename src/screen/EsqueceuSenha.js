@@ -1,12 +1,35 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
 import HeaderEsqueceuSenha from '../components/HeaderEsqueceuSenha';
 import EmailField from '../components/EmailField';
 import InfoCard from '../components/InfoCard';
+import { recuperarSenha } from '../api/auth';
 
 export default function EsqueceuSenha({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [carregando, setCarregando] = useState(false);
+
+  async function handleEnviar() {
+    if (!email) {
+      Alert.alert('Atenção', 'Digite seu email institucional.');
+      return;
+    }
+    setCarregando(true);
+    try {
+      await recuperarSenha(email);
+      Alert.alert('Email enviado', 'Verifique sua caixa de entrada (e spam) para redefinir sua senha.', [
+        { text: 'OK', onPress: () => navigation?.goBack() },
+      ]);
+    } catch {
+      Alert.alert('Erro', 'Não foi possível enviar o link. Tente novamente.');
+    } finally {
+      setCarregando(false);
+    }
+  }
+
   return (
     <ScrollView style={styles.wrapper} contentContainerStyle={styles.container}>
 
@@ -14,13 +37,13 @@ export default function EsqueceuSenha({ navigation }) {
 
       <View style={styles.content}>
 
-        <EmailField />
+        <EmailField value={email} onChangeText={setEmail} />
 
         <InfoCard text="Você receberá um link para redefinir sua senha. Verifique também sua caixa de spam." />
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleEnviar} disabled={carregando}>
           <Ionicons name="send-outline" size={18} color="#fff" />
-          <Text style={styles.buttonText}>Enviar link de recuperação</Text>
+          <Text style={styles.buttonText}>{carregando ? 'Enviando...' : 'Enviar link de recuperação'}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
