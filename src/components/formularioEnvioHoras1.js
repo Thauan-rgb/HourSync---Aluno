@@ -4,26 +4,50 @@ import Dropdown from './dropdown';
 import TirarFotoEpdf from './tirarFotoEpdf';
 import { listarCursos } from '../api/cursos';
 import { listarCategorias } from '../api/categorias';
+import { listarAtividades } from '../api/atividades';
 import { useAuth } from '../contexto/AuthContext';
 
 export default function Formulario({
-  cursoNome, setCursoNome, setCursoId,
-  categoriaNome, setCategoriaNome, setCategoriaId,
+  cursoNome, setCursoNome, setCursoId, cursoId,
+  categoriaNome, setCategoriaNome, setCategoriaId, categoriaId,
+  atividadeNome, setAtividadeNome, setAtividadeId,
   horas, setHoras,
   data, setData,
   onArquivoSelecionado,
 }) {
-  const { token } = useAuth();
+  const { token, usuario } = useAuth();
   const [cursos, setCursos] = useState([]);
   const [categorias, setCategorias] = useState([]);
+  const [todasAtividades, setTodasAtividades] = useState([]);
+  const [atividadesFiltradas, setAtividadesFiltradas] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
     async function carregar() {
       try {
-        const [c, cat] = await Promise.all([listarCursos(token), listarCategorias(token)]);
-        setCursos(Array.isArray(c) ? c : []);
-        setCategorias(Array.isArray(cat) ? cat : []);
+        const [todosCursos, cat, atv] = await Promise.all([
+          listarCursos(token),
+          listarCategorias(token),
+          listarAtividades(token),
+        ]);
+
+        const cursoIdsDoAluno = (usuario?.cursoId || []).map((c) =>
+          (c._id || c)?.toString()
+        );
+        const cursosDoAluno =
+          cursoIdsDoAluno.length > 0
+            ? (Array.isArray(todosCursos)
+                ? todosCursos.filter((c) => cursoIdsDoAluno.includes(c._id?.toString()))
+                : [])
+            : (Array.isArray(todosCursos) ? todosCursos : []);
+
+        const catSemDup = Array.isArray(cat)
+          ? cat.filter((c, i, arr) => arr.findIndex((x) => x.nome === c.nome) === i)
+          : [];
+
+        setCursos(cursosDoAluno);
+        setCategorias(catSemDup);
+        setTodasAtividades(Array.isArray(atv) ? atv : []);
       } catch {
         /* silencioso */
       } finally {
@@ -31,7 +55,23 @@ export default function Formulario({
       }
     }
     carregar();
-  }, []);
+  }, [token]);
+
+  useEffect(() => {
+    if (!categoriaId) {
+      setAtividadesFiltradas([]);
+      setAtividadeNome('');
+      setAtividadeId('');
+      return;
+    }
+    const filtradas = todasAtividades.filter((a) => {
+      const aCatId = a.categoriaId?._id || a.categoriaId;
+      return aCatId?.toString() === categoriaId?.toString();
+    });
+    setAtividadesFiltradas(filtradas);
+    setAtividadeNome('');
+    setAtividadeId('');
+  }, [categoriaId, todasAtividades]);
 
   function handleDataChange(text) {
     const numeros = text.replace(/\D/g, '');
@@ -51,6 +91,12 @@ export default function Formulario({
     setCategoriaNome(nome);
     const encontrada = categorias.find((c) => c.nome === nome);
     if (encontrada) setCategoriaId(encontrada._id);
+  }
+
+  function handleSelecionarAtividade(nome) {
+    setAtividadeNome(nome);
+    const encontrada = atividadesFiltradas.find((a) => a.nome === nome);
+    if (encontrada) setAtividadeId(encontrada._id);
   }
 
   if (carregando) {
@@ -75,6 +121,15 @@ export default function Formulario({
         opcoes={categorias.map((c) => c.nome)}
         valor={categoriaNome}
         onSelecionar={handleSelecionarCategoria}
+      />
+
+      <Dropdown
+        label="Selecione a Atividade"
+        opcoes={atividadesFiltradas.map((a) => a.nome)}
+        valor={atividadeNome}
+        onSelecionar={handleSelecionarAtividade}
+        desabilitado={!categoriaId}
+        placeholder={!categoriaId ? 'Selecione uma categoria primeiro' : 'Selecione...'}
       />
 
       <View style={styles.horas}>
