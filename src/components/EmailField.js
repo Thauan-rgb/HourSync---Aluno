@@ -3,7 +3,7 @@ import { View, Text, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../styles/EmailField.styles';
 
-export default function EmailField() {
+export default function EmailField({ value, onChangeText }) {
   return (
     <>
       <Text style={styles.fieldLabel}>Email institucional</Text>
@@ -16,6 +16,8 @@ export default function EmailField() {
           placeholderTextColor="#B1B1B1"
           keyboardType="email-address"
           autoCapitalize="none"
+          value={value}
+          onChangeText={onChangeText}
         />
       </View>
 
