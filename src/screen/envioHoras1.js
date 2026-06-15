@@ -26,7 +26,7 @@ export default function EnvioHoras1Screen({ navigation }) {
     if (data) {
       const partes = data.split('/');
       if (partes.length === 3 && partes[2].length === 4) {
-        dataConvertida = ${partes[2]}-${partes[1]}-${partes[0]};
+        dataConvertida = `${partes[2]}-${partes[1]}-${partes[0]}`;
       }
     }
 
