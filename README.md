@@ -125,6 +125,15 @@ npm install -g expo-cli
 - Para rodar no dispositivo físico: app **Expo Go** ([Android](https://play.google.com/store/apps/details?id=host.exp.exponent) | [iOS](https://apps.apple.com/app/expo-go/id982107779))
 - Para rodar em emulador: [Android Studio](https://developer.android.com/studio) ou [Xcode](https://developer.apple.com/xcode/) (somente macOS)
 
+Após clonar o repositório e instalar as dependências base (`npm install`), instale também as seguintes dependências via Expo:
+
+```bash
+npx expo install babel-preset-expo
+npx expo install react-dom react-native-web
+npx expo install react-native-svg @react-navigation/native @expo/vector-icons expo-status-bar
+npx expo install react-native-svg
+```
+
 ---
 
 ## Como Rodar o Projeto
